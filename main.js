@@ -1,7 +1,5 @@
 var Controls = React.createClass({
   mixins: [ReactFireMixin],
-  componentWillMount: function() {
-  },
   onUse: function(e) {
     e.preventDefault();
     var indulgences = firebase.database().ref("indulgences/" + this.props.uid);
@@ -49,9 +47,14 @@ var ProgressMeter = React.createClass({
   componentDidMount: function() {
     var update = function() {
       this.forceUpdate();
-      setTimeout(update, 1000);
+      this.timeout = setTimeout(update, 1000);
     }.bind(this);
-    setTimeout(update, 1000);
+    this.timeout = setTimeout(update, 1000);
+  },
+  componentWillUnmount: function() {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
   },
   componentWillUpdate: function() {
     var indulgences = firebase.database().ref("indulgences/" + this.props.uid);
@@ -91,15 +94,42 @@ var ProgressMeter = React.createClass({
 });
 
 var App = React.createClass({
-  /*this.firebaseRefs.items.push({
-    text: 'hi'
-  });*/
+  signOut: function(e) {
+    e.preventDefault();
+    firebase.auth().signOut();
+  },
   render: function() {
     return (
       <div>
         <h1 className="page-header">indulg.io</h1>
         <ProgressMeter uid={this.props.uid} />
         <Controls uid={this.props.uid} />
+        <div className='signout'>
+          <button onClick={this.signOut} type="button" className="btn btn-default">Sign out</button>
+        </div>
+      </div>
+    );
+  }
+});
+
+var SignIn = React.createClass({
+  onGoogle: function(e) {
+    e.preventDefault();
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/plus.login');
+    firebase.auth().signInWithRedirect(provider);
+  },
+  onAnon: function(e) {
+    e.preventDefault();
+    firebase.auth().signInAnonymously().catch(function(error) {
+      console.error(error);
+    });
+  },
+  render: function() {
+    return (
+      <div>
+        <button onClick={this.onGoogle} type="button" className="btn btn-success">Sign in with Google</button>
+        <button onClick={this.onAnon} type="button" className="btn btn-danger">Sign in anonymously</button>
       </div>
     );
   }
@@ -115,15 +145,16 @@ firebase.auth().onAuthStateChanged(function(user) {
       document.getElementById('content')
     );
   } else {
+    ReactDOM.render(<SignIn />, document.getElementById('content'));
     // User is signed out.
     // ...
-    firebase.auth().signInAnonymously().catch(function(error) {
+    /*firebase.auth().signInAnonymously().catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
       console.log(error);
       // ...
-    });
+    });*/
   }
   // ...
 });
