@@ -128,8 +128,11 @@ var SignIn = React.createClass({
   render: function() {
     return (
       <div>
-        <button onClick={this.onGoogle} type="button" className="btn btn-success">Sign in with Google</button>
-        <button onClick={this.onAnon} type="button" className="btn btn-danger">Sign in anonymously</button>
+        <h1 className="page-header">indulg.io</h1>
+        <div className="btn-toolbar">
+          <button onClick={this.onGoogle} type="button" className="btn btn-success">Sign in with Google</button>
+          <button onClick={this.onAnon} type="button" className="btn btn-danger">Sign in anonymously</button>
+        </div>
       </div>
     );
   }
