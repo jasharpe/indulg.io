@@ -97,7 +97,7 @@ var App = React.createClass({
   render: function() {
     return (
       <div>
-        <h1 className="page-header">Indulg.io</h1>
+        <h1 className="page-header">indulg.io</h1>
         <ProgressMeter uid={this.props.uid} />
         <Controls uid={this.props.uid} />
       </div>
