@@ -99,12 +99,22 @@ var App = React.createClass({
     firebase.auth().signOut();
   },
   render: function() {
+    var greeting;
+    if (this.props.isAnon) {
+      greeting = 'anonymously so your progress might disappear.';
+    } else if (this.props.name) {
+      greeting = <span>as {this.props.name}.</span>;
+    } else {
+      greeting = <span>as {this.props.email}.</span>;
+    }
+
     return (
       <div>
         <h1 className="page-header">indulg.io</h1>
         <ProgressMeter uid={this.props.uid} />
         <Controls uid={this.props.uid} />
         <div className='signout'>
+          <div className="signed-in-notice">Signed in {greeting}</div>
           <button onClick={this.signOut} type="button" className="btn btn-default">Sign out</button>
         </div>
       </div>
@@ -141,23 +151,14 @@ var SignIn = React.createClass({
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     // User is signed in.
-    var isAnonymous = user.isAnonymous;
     var uid = user.uid;
     ReactDOM.render(
-      <App uid={uid} />,
+      <App uid={uid} isAnon={user.isAnonymous} name={user.displayName} email={user.email} />,
       document.getElementById('content')
     );
   } else {
-    ReactDOM.render(<SignIn />, document.getElementById('content'));
     // User is signed out.
-    // ...
-    /*firebase.auth().signInAnonymously().catch(function(error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log(error);
-      // ...
-    });*/
+    ReactDOM.render(<SignIn />, document.getElementById('content'));
   }
   // ...
 });
