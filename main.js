@@ -38,6 +38,49 @@ var Controls = React.createClass({
   }
 });
 
+var UpdateFactor = React.createClass({
+  onSubmit: function(e) {
+    e.preventDefault();
+    var factor = this.state.value;
+    if (!$.isNumeric(factor)) {
+      console.error(factor + ' is not a number');
+      return;
+    }
+    var factorNumber = parseFloat(factor);
+    if (factorNumber < 0) {
+      console.error(factorNumber + ' is less than zero');
+      return;
+    }
+    var indulgences = firebase.database().ref("indulgences/" + this.props.uid);
+    indulgences.once('value', function(snap) {
+      if (snap.val() === null) {
+        return;
+      }
+      var factor = snap.val().factor;
+      var elapsed = new Date().getTime() - snap.val().last_updated;
+      var currentCount = snap.val().count + elapsed / (factor * 1000);
+      indulgences.child('count').set(currentCount);
+      indulgences.child('last_updated').set(new Date().getTime());
+      indulgences.child('factor').set(factorNumber);
+    });
+  },
+  onChange: function(e) {
+    this.setState({value: e.target.value});
+  },
+  render: function() {
+    return (
+      <form className="spaced" onSubmit={this.onSubmit}>
+        <div className="input-group">
+          <input type="text" className="form-control" onChange={this.onChange} placeholder="Seconds per indulgence"/>
+          <span className="input-group-btn">
+            <input className="btn btn-default" type="submit" value="Set"/>
+          </span>
+        </div>
+      </form>
+    );
+  }
+});
+
 var ProgressMeter = React.createClass({
   mixins: [ReactFireMixin],
   componentWillMount: function() {
@@ -113,7 +156,8 @@ var App = React.createClass({
         <h1 className="page-header">indulg.io</h1>
         <ProgressMeter uid={this.props.uid} />
         <Controls uid={this.props.uid} />
-        <div className='signout'>
+        <UpdateFactor uid={this.props.uid} />
+        <div className='spaced'>
           <div className="signed-in-notice">Signed in {greeting}</div>
           <button onClick={this.signOut} type="button" className="btn btn-default">Sign out</button>
         </div>
