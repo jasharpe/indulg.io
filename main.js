@@ -127,7 +127,7 @@ var ProgressMeter = React.createClass({
         <p>You have {Math.floor(currentCount)} indulgences.</p>
         <p>Working on another (1 per {this.state.indulgences.factor} seconds):</p>
         <div className="progress">
-          <div className="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100" style={{width: progress + "%"}}>
+          <div className="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100" style={{width: progress + "%"}}>
             <span className="sr-only">{progress}% Complete (success)</span>
           </div>
         </div>
