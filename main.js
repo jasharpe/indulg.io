@@ -12,7 +12,13 @@ var Controls = React.createClass({
       var currentCount = snap.val().count + elapsed / (factor * 1000);
       indulgences.child('count').set(currentCount - 1);
       indulgences.child('last_updated').set(new Date().getTime());
-    });
+      firebase.database().ref("indulgence_list/" + this.props.uid).push({
+        type: 'Use',
+        time: new Date().getTime(),
+        reason: '',
+        total: currentCount - 1
+      });
+    }.bind(this));
   },
   onEarn: function(e) {
     e.preventDefault();
@@ -25,8 +31,14 @@ var Controls = React.createClass({
       var elapsed = new Date().getTime() - snap.val().last_updated;
       var currentCount = snap.val().count + elapsed / (factor * 1000);
       indulgences.child('count').set(currentCount + 1);
-      indulgences.child('last_updated').set(new Date().getTime())
-    });
+      indulgences.child('last_updated').set(new Date().getTime());
+      firebase.database().ref("indulgence_list/" + this.props.uid).push({
+        type: 'Earn',
+        time: new Date().getTime(),
+        reason: '',
+        total: currentCount + 1
+      });
+    }.bind(this));
   },
   render: function() {
     return (
@@ -136,6 +148,50 @@ var ProgressMeter = React.createClass({
   }
 });
 
+var List = React.createClass({
+  mixins: [ReactFireMixin],
+  componentWillMount: function() {
+    var ref = firebase.database().ref("indulgence_list/" + this.props.uid);
+    this.bindAsArray(ref, "indulgence_list");
+  },
+  onChange: function(key) {
+    return function(e) {
+      e.preventDefault();
+      firebase.database().ref("indulgence_list/" + this.props.uid + "/" + key + "/reason").set(e.target.value);
+    }.bind(this);
+  },
+  render: function() {
+    var rows = [];
+    this.state.indulgence_list.forEach(function(indulgence) {
+      var timestamp = new Date(indulgence.time).toLocaleTimeString() + ' ' + new Date(indulgence.time).toLocaleDateString();
+      rows.push(
+          <tr key={indulgence['.key']}>
+            <td>{indulgence.type}</td>
+            <td>{timestamp}</td>
+            <td><input type="text" value={indulgence.reason} onChange={this.onChange(indulgence['.key'])} /></td>
+            <td>{Math.floor(indulgence.total)}</td>
+          </tr>
+      );
+    }.bind(this));
+    rows.reverse();
+    return (
+        <table className="table table-condensed table-hover">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>When</th>
+              <th>Reason</th>
+              <th>Total After</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
+        </table>
+    );
+  }
+});
+
 var App = React.createClass({
   signOut: function(e) {
     e.preventDefault();
@@ -157,6 +213,7 @@ var App = React.createClass({
         <ProgressMeter uid={this.props.uid} />
         <Controls uid={this.props.uid} />
         <UpdateFactor uid={this.props.uid} />
+        <List uid={this.props.uid} />
         <div className='spaced'>
           <div className="signed-in-notice">Signed in {greeting}</div>
           <button onClick={this.signOut} type="button" className="btn btn-default">Sign out</button>
