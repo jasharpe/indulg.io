@@ -222,24 +222,15 @@ var Timers = createReactClass({
 
   render() {
     let rows = [];
-    let doneRows = [];
     this.state.timers.forEach(function(timer) {
-      if (!timer.paused && Date.now() - timer.startTime > timer.realTotalTime * 1000) {
-        doneRows.push(
-          <div key={timer['.key']}>
-            <Timer done="true" refStr={"timers/" + this.props.uid + "/" + timer['.key']} />
-            <hr />
-          </div>);
-      } else {
-        rows.push(
-          <div key={timer['.key']}>
-            <Timer refStr={"timers/" + this.props.uid + "/" + timer['.key']} />
-            <hr />
-          </div>);
-      }
+      var done = (!timer.paused && Date.now() - timer.startTime > timer.realTotalTime * 1000);
+      rows.push(
+        <div key={timer['.key']}>
+          <Timer done={done} refStr={"timers/" + this.props.uid + "/" + timer['.key']} />
+          <hr />
+        </div>);
     }.bind(this));
     rows.reverse();
-    doneRows.reverse();
     return (
       <div className="App">
         <h1>Timers</h1>
@@ -248,9 +239,6 @@ var Timers = createReactClass({
           <input className="form-control Time" type="text" placeholder="hh" id="hours" /> : <input className="form-control Time" type="text" placeholder="mm" id="minutes" /> : <input className="form-control Time" type="text" placeholder="ss" id="seconds" />
           <button type="submit" className="Add btn btn-success"><span className="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
         </form>
-        <hr />
-        <h3 className="Completed">Completed</h3>
-        {doneRows}
       </div>
     );
   }
