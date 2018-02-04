@@ -192,12 +192,70 @@ var List = React.createClass({
   }
 });
 
+var Indulgences = React.createClass({
+  render: function() {
+    return (
+      <div>
+        <ProgressMeter uid={this.props.uid} />
+        <Controls uid={this.props.uid} />
+        <UpdateFactor uid={this.props.uid} />
+        <List uid={this.props.uid} />
+      </div>
+    );
+  }
+});
+
+var Timer = React.createClass({
+  componentWillMount: function() {
+    this.setState({time: 1200});
+    var update = function() {
+      //this.forceUpdate();
+      this.setState({time: this.state.time - 1});
+      setTimeout(update, 1000);
+    }.bind(this);
+    setTimeout(update, 1000);
+  },
+  render: function() {
+    var seconds = this.state.time % 60;
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+    var minutes = (this.state.time - seconds) / 60;
+    if (minutes < 10) {
+      minutes = '0' + minutes;
+    }
+
+    var progress = 100 * (1 - this.state.time / 1200);
+
+    return (
+      <div>
+        <h2>{minutes}:{seconds}</h2>
+        <div className="progress">
+          <div className="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100" style={{width: progress + "%"}}>
+            <span className="sr-only">{progress}% Complete (success)</span>
+          </div>
+        </div>
+        
+      </div>
+    );
+  }
+});
+
 var App = React.createClass({
   signOut: function(e) {
     e.preventDefault();
     firebase.auth().signOut();
   },
+  timer: function(e) {
+    e.preventDefault();
+    this.setState({page: 'timer'});
+  },
   render: function() {
+    var page = <Indulgences uid={this.uid} />;
+    if (this.state != null && this.state.page == 'timer') {
+      page = <Timer />;
+    }
+
     var greeting;
     if (this.props.isAnon) {
       greeting = 'anonymously so your progress might disappear.';
@@ -210,17 +268,17 @@ var App = React.createClass({
     return (
       <div>
         <h1 className="page-header">indulg.io</h1>
-        <ProgressMeter uid={this.props.uid} />
-        <Controls uid={this.props.uid} />
-        <UpdateFactor uid={this.props.uid} />
-        <List uid={this.props.uid} />
+        <div>
+          <button onClick={this.timer} type="button" className="btn btn-default">Timer</button>
+        </div>
+        {page}
         <div className='spaced'>
           <div className="signed-in-notice">Signed in {greeting}</div>
           <button onClick={this.signOut} type="button" className="btn btn-default">Sign out</button>
         </div>
       </div>
     );
-  }
+  },
 });
 
 var SignIn = React.createClass({
