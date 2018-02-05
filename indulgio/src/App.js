@@ -131,9 +131,9 @@ const Timer = createReactClass({
 
     var progressBarClasses;
     if (this.props.done) {
-      progressBarClasses = "progress-bar progress-bar-danger";
+      progressBarClasses = "progress-bar progress-bar-danger progress-bar-striped";
     } else if (this.state.timer.paused) {
-      progressBarClasses = "progress-bar progress-bar-success";
+      progressBarClasses = "progress-bar progress-bar-success progress-bar-striped";
     } else {
       progressBarClasses = "progress-bar progress-bar-success progress-bar-striped active";
     }
@@ -208,10 +208,34 @@ var Timers = createReactClass({
 
   createTimer(e) {
     e.preventDefault();
-    var seconds = document.getElementById("seconds").value;
-    var minutes = document.getElementById("minutes").value;
-    var hours = document.getElementById("hours").value;
+    var secondsStr = document.getElementById("seconds").value;
+    var seconds = secondsStr === "" ? 0 : parseInt(secondsStr, 10);
+    if (isNaN(seconds)) {
+      // TODO: do something useful.
+      return;
+    }
+
+    var minutesStr = document.getElementById("minutes").value;
+    var minutes = minutesStr === "" ? 0 : parseInt(minutesStr, 10);
+    if (isNaN(minutes)) {
+      // TODO: do something useful.
+      return;
+    }
+
+    var hoursStr = document.getElementById("hours").value;
+    var hours = hoursStr === "" ? 0 : parseInt(hoursStr, 10);
+    if (isNaN(hours)) {
+      // TODO: do something useful.
+      return;
+    }
+
     var time = seconds + 60 * minutes + 3600 * hours;
+    if (isNaN(time)) {
+      // TODO: do something useful.
+      return;
+    }
+    console.log(time);
+
     this.ref.push({
       title: '',
       startTime: Date.now(),
